@@ -1,6 +1,5 @@
 from math import ceil
 
-from bcrypt import gensalt, hashpw
 from werkzeug.datastructures import ImmutableMultiDict
 
 from app.main import db
@@ -14,12 +13,12 @@ _CONTENT_PER_PAGE = Config.DEFAULT_CONTENT_PER_PAGE
 def get_users(params: ImmutableMultiDict):
     page = params.get("page", type=int, default=1)
     per_page = params.get("per_page", type=int, default=_CONTENT_PER_PAGE)
-    username = params.get("username", type=str)
+    name = params.get("name", type=str)
 
     filters = []
 
-    if username:
-        filters.append(User.username.ilike(f"%{username}%"))
+    if name:
+        filters.append(User.name.ilike(f"%{name}%"))
 
     pagination = (
         User.query.filter(*filters)
@@ -40,24 +39,14 @@ def get_user_by_id(user_id: int) -> None:
 
 
 def save_new_user(data: dict[str, str]) -> None:
-    user = User.query.filter_by(username=data.get("username")).scalar()
+    user = User.query.filter_by(name=data.get("name")).scalar()
 
     if user:
-        raise DefaultException("username_in_use", code=409)
+        raise DefaultException("name_in_use", code=409)
 
-    new_user = User(
-        username=data.get("username"), password=hash_password(data.get("password"))
-    )
+    new_user = User(name=data.get("name"), password=hash_password(data.get("password")))
 
     db.session.add(new_user)
-    db.session.commit()
-
-
-def update_user(user_id: int, data: dict[str, any]) -> None:
-    user = get_user(user_id=user_id)
-
-    user.password = hash_password(data.get("password"))
-
     db.session.commit()
 
 
@@ -75,5 +64,4 @@ def get_user(user_id: int, options: list = None) -> User:
     return user
 
 
-def hash_password(password: str) -> str:
-    return hashpw(password.encode("utf-8"), gensalt()).decode("utf-8")
+from app.main.service.user.password_service import hash_password

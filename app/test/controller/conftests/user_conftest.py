@@ -5,6 +5,6 @@ import pytest
 def base_user():
     """Base user data"""
 
-    user = {"username": "new_user@uece.br", "password": "new_password"}
+    user = {"name": "new_user@uece.br", "password": "new_password"}
 
     return user

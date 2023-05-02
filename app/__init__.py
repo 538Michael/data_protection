@@ -1,14 +1,19 @@
 from flask import Blueprint
 from flask_restx import Api
 
-from app.main.controller import user_ns
+from app.main.controller import auth_ns, password_ns, user_ns
 from app.main.exceptions import DefaultException, ValidationException
 from app.main.util import DefaultResponsesDTO
 
 blueprint = Blueprint("api", __name__)
 
 authorizations = {
-    "api_key": {"type": "apiKey", "in": "header", "name": "x-access-token"}
+    "apikey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Type in the *'Value'* input box below: **'Bearer &lt;JWT&gt;'**, where JWT is the token",
+    }
 }
 
 
@@ -18,10 +23,11 @@ api = Api(
     title="Data Protection based on Anonymization Techniques",
     version="1.0",
     description="Back-end",
-    security="apikey",
 )
 
 api.add_namespace(user_ns, path="/user")
+api.add_namespace(auth_ns, path="/user/auth")
+api.add_namespace(password_ns, path="/user/password")
 
 api.add_namespace(DefaultResponsesDTO.api)
 
