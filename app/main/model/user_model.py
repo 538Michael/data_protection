@@ -11,5 +11,7 @@ class User(db.Model):
         db.Boolean, nullable=False, default=False, server_default="false"
     )
 
+    databases = db.relationship("Database", back_populates="user")
+
     def __repr__(self) -> str:
         return f"<User {self.name}>"
