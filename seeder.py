@@ -4,4 +4,5 @@ from seeders import *
 
 def create_seed():
     add_users(db)
+    add_valid_databases(db)
     db.session.commit()

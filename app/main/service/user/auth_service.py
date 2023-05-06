@@ -59,8 +59,6 @@ def jwt_required(admin_check: bool = False):
             except:
                 raise DefaultException("token_invalid", code=401)
 
-            print(current_user.is_admin)
-
             if admin_check and not current_user.is_admin:
                 raise DefaultException("administrator_privileges_required", code=403)
 
