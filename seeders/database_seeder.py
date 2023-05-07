@@ -4,7 +4,7 @@ from app.main.model import Database
 def add_databases(db):
     new_database = Database(
         user_id=1,
-        valid_database_id=2,
+        type="postgresql",
         username="postgres",
         password="postgres",
         host="localhost",
@@ -15,7 +15,7 @@ def add_databases(db):
 
     new_database = Database(
         user_id=1,
-        valid_database_id=2,
+        type="postgresql",
         username="michaelsouza",
         password="larces132*",
         host="client-database.postgres.uhserver.com",

@@ -1,4 +1,11 @@
+import enum
+
 from app.main import db
+
+
+class DatabaseType(enum.Enum):
+    mysql = 1
+    postgresql = 2
 
 
 class Database(db.Model):
@@ -15,10 +22,8 @@ class Database(db.Model):
 
     id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
-    valid_database_id = db.Column(
-        db.Integer, db.ForeignKey("valid_database.id"), nullable=False
-    )
 
+    type = db.Column(db.Enum(DatabaseType), nullable=False)
     username = db.Column(db.String(255), nullable=False)
     password = db.Column(db.String(255), nullable=False)
     host = db.Column(db.String(255), nullable=False)
@@ -26,12 +31,11 @@ class Database(db.Model):
     name = db.Column(db.String(255), nullable=False)
 
     user = db.relationship("User", back_populates="databases")
-    valid_database = db.relationship("ValidDatabase", back_populates="databases")
 
     @property
     def url(self) -> str:
         db_url = "{}://{}:{}@{}:{}/{}".format(
-            self.valid_database.name,
+            self.type,
             self.username,
             self.password,
             self.host,
@@ -43,7 +47,7 @@ class Database(db.Model):
     @property
     def cloud_url(self) -> str:
         cloud_db_url = "{}://{}:{}@{}:{}/{}".format(
-            self.valid_database.name,
+            self.type,
             "postgres",
             "postgres",
             "localhost",
