@@ -1,29 +1,25 @@
-import enum
-
 from app.main import db
 
-
-class DatabaseType(enum.Enum):
-    mysql = 1
-    postgresql = 2
+DATABASE_TYPE = ["mysql", "postgresql"]
 
 
 class Database(db.Model):
     __tablename__ = "database"
     _table_args_ = (
         db.UniqueConstraint(
+            "type",
             "username",
             "host",
             "port",
             "name",
-            name="unique_database_username_host_port_name",
+            name="unique_database_type_username_host_port_name",
         ),
     )
 
     id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
 
-    type = db.Column(db.Enum(DatabaseType), nullable=False)
+    type = db.Column(db.Enum(*DATABASE_TYPE, name="database_type_enum"), nullable=False)
     username = db.Column(db.String(255), nullable=False)
     password = db.Column(db.String(255), nullable=False)
     host = db.Column(db.String(255), nullable=False)
