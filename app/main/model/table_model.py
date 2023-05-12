@@ -19,6 +19,7 @@ class Table(db.Model):
     name = db.Column(db.String(255), nullable=False)
 
     database = db.relationship("Database", back_populates="tables")
+    columns = db.relationship("Column", back_populates="table")
 
     def __repr__(self) -> str:
         return f"<Table {self.id}>"

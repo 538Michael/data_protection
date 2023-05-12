@@ -1,7 +1,14 @@
 from flask import Blueprint
 from flask_restx import Api
 
-from app.main.controller import auth_ns, database_ns, password_ns, table_ns, user_ns
+from app.main.controller import (
+    auth_ns,
+    column_ns,
+    database_ns,
+    password_ns,
+    table_ns,
+    user_ns,
+)
 from app.main.exceptions import DefaultException, ValidationException
 from app.main.util import DefaultResponsesDTO
 
@@ -30,6 +37,7 @@ api.add_namespace(auth_ns, path="/user/auth")
 api.add_namespace(password_ns, path="/user/password")
 api.add_namespace(database_ns, path="/database")
 api.add_namespace(table_ns, path="/table")
+api.add_namespace(column_ns, path="/column")
 
 api.add_namespace(DefaultResponsesDTO.api)
 
