@@ -1,6 +1,7 @@
 from math import ceil
 
-from sqlalchemy import and_
+from sqlalchemy import MetaData, Table, and_, create_engine
+from sqlalchemy_utils import create_database, database_exists
 from werkzeug.datastructures import ImmutableMultiDict
 
 from app.main import db
@@ -141,6 +142,57 @@ def _validate_database_unique_constraint(
         *filters,
     ).first():
         raise DefaultException("database_already_exist", code=409)
+
+
+def clone_database(database: Database, src_table: str, dest_columns: list = None):
+    # Create an engine and metadata for the source database
+    src_engine = create_engine(url=database.url)
+    src_metadata = MetaData()
+
+    # Reflect the structure of the source table
+    src_table = Table(
+        src_table,
+        src_metadata,
+        include_columns=dest_columns,
+        autoload_with=src_engine,
+    )
+
+    # Create an engine and metadata for the destination database
+    dest_engine = create_engine(url=database.cloud_url)
+    dest_metadata = MetaData()
+
+    # Create a table object representing the destination table
+    dest_table = Table(
+        src_table,
+        dest_metadata,
+        autoload_with=src_engine,
+        include_columns=dest_columns,
+    )
+
+    # Drop and recreate the destination table
+    if not database_exists(url=dest_engine.url):
+        create_database(url=dest_engine.url)
+    dest_metadata.drop_all(bind=dest_engine, checkfirst=True)
+    dest_metadata.create_all(bind=dest_engine, checkfirst=True)
+
+    try:
+        # Begin transactions with both source and destination databases
+        with src_engine.begin() as srcConnection, dest_engine.begin() as destConnection:
+            # Select all rows from the source table
+            rows = srcConnection.execute(src_table.select())
+            rows_values = [tuple(row) for row in rows]
+
+            # Insert the rows into the destination table
+            destConnection.execute(dest_table.insert().values(rows_values))
+    except Exception as e:
+        # Print any exceptions that occur during the process
+        print(e)
+    finally:
+        # Close the connections and dispose of the engines
+        srcConnection.close()
+        src_engine.dispose()
+        destConnection.close()
+        dest_engine.dispose()
 
 
 from app.main.service.user.user_service import get_user

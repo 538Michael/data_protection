@@ -1,3 +1,4 @@
+from faker import Faker
 from flask import Flask
 from flask.app import Flask
 from flask_cors import CORS
@@ -7,6 +8,7 @@ from app.main.config import config_by_name
 
 db = SQLAlchemy()
 app = Flask(__name__)
+faker = Faker(locale=["pt_BR"])
 CORS(app)
 
 

@@ -1,3 +1,7 @@
+from sqlalchemy import MetaData
+from sqlalchemy import Table as saTable
+from sqlalchemy import create_engine
+
 from app.main import db
 
 
@@ -23,3 +27,13 @@ class Table(db.Model):
 
     def __repr__(self) -> str:
         return f"<Table {self.id}>"
+
+    @property
+    def primary_key(self):
+        # create engine, reflect existing columns, and create table object for oldTable
+        engine = create_engine(url=self.database.url)
+        metadata = MetaData()
+        tableObj = saTable(self.name, metadata, autoload_with=engine)
+        primary_key = tableObj.primary_key.columns.keys()[0]
+        engine.dispose()
+        return primary_key

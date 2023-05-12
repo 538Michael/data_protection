@@ -49,10 +49,7 @@ def save_new_table(database_id: int, data: dict[str, str]) -> None:
 
     _validate_table_unique_constraint(database_id=database_id, name=name)
 
-    new_table = Table(
-        database=database,
-        name=name,
-    )
+    new_table = Table(database=database, name=name)
 
     db.session.add(new_table)
     db.session.commit()

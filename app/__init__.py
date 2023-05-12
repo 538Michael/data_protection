@@ -2,6 +2,7 @@ from flask import Blueprint
 from flask_restx import Api
 
 from app.main.controller import (
+    anonymization_ns,
     auth_ns,
     column_ns,
     database_ns,
@@ -38,6 +39,7 @@ api.add_namespace(password_ns, path="/user/password")
 api.add_namespace(database_ns, path="/database")
 api.add_namespace(table_ns, path="/table")
 api.add_namespace(column_ns, path="/column")
+api.add_namespace(anonymization_ns, path="/anonymization")
 
 api.add_namespace(DefaultResponsesDTO.api)
 

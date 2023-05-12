@@ -1,5 +1,7 @@
 from app.main import db
 
+ANONYMIZATION_TYPE = ["name", "date_time", "date", "time", "cpf", "rg", "ipv4", "ipv6"]
+
 
 class Column(db.Model):
     __tablename__ = "column"
@@ -15,6 +17,10 @@ class Column(db.Model):
     table_id = db.Column(db.Integer, db.ForeignKey("table.id"), nullable=False)
 
     name = db.Column(db.String(255), nullable=False)
+    anonymization_type = db.Column(
+        db.Enum(*ANONYMIZATION_TYPE, name="column_anonymization_type_enum"),
+        nullable=False,
+    )
 
     table = db.relationship("Table", back_populates="columns")
 

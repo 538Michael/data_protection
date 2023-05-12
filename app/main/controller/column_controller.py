@@ -37,7 +37,7 @@ class Column(Resource):
                 "enum": _CONTENT_PER_PAGE,
                 "type": int,
             },
-            "table_id": {"description": "Database id", "type": int},
+            "table_id": {"description": "Table id", "type": int},
             "name": {"description": "Column name", "type": str},
         },
         description=f"List of registered columns with pagination. {_DEFAULT_CONTENT_PER_PAGE} columns per page.",
@@ -80,12 +80,12 @@ class ColumnById(Resource):
 
 
 @api.route("/<int:table_id>")
-class ColumnByDatabaseId(Resource):
+class ColumnByTableId(Resource):
     @api.doc("Creates a new column")
     @api.expect(_column_post, validate=True)
     @api.response(201, "column_created", _default_message_response)
     @api.response(400, "Input payload validation failed", _validation_error_response)
-    @api.response(404, "database_not_found", _default_message_response)
+    @api.response(404, "table_not_found", _default_message_response)
     @api.response(409, "column_already_exist", _default_message_response)
     def post(self, table_id):
         """Creates a new column"""
