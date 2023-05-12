@@ -27,6 +27,7 @@ class Database(db.Model):
     name = db.Column(db.String(255), nullable=False)
 
     user = db.relationship("User", back_populates="databases")
+    tables = db.relationship("Table", back_populates="database")
 
     @property
     def url(self) -> str:

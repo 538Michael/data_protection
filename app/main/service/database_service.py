@@ -85,6 +85,8 @@ def update_database(database_id: int, data: dict[str, any]) -> None:
     new_port = data.get("port")
     new_name = data.get("name")
 
+    database = get_database(database_id=database_id)
+
     _validate_database_unique_constraint(
         type=new_type,
         username=new_username,
@@ -93,8 +95,6 @@ def update_database(database_id: int, data: dict[str, any]) -> None:
         name=new_name,
         filters=[Database.id != database_id],
     )
-
-    database = get_database(database_id=database_id)
 
     database.type = new_type
     database.username = new_username
