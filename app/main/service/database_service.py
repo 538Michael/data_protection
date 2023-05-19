@@ -179,11 +179,20 @@ def clone_database(database: Database, src_table: str, dest_columns: list = None
         # Begin transactions with both source and destination databases
         with src_engine.begin() as srcConnection, dest_engine.begin() as destConnection:
             # Select all rows from the source table
-            rows = srcConnection.execute(src_table.select())
-            rows_values = [tuple(row) for row in rows]
+            results = srcConnection.execute(src_table.select())
 
-            # Insert the rows into the destination table
-            destConnection.execute(dest_table.insert().values(rows_values))
+            # Fetch the rows in batches of a specified size
+            batch_size = 100000
+            rows = results.fetchmany(batch_size)
+
+            while rows:
+                rows_values = [tuple(row) for row in rows]
+                # Insert the rows into the destination table
+                destConnection.execute(dest_table.insert().values(rows_values))
+
+                # Fetch the next batch of rows
+                rows = results.fetchmany(batch_size)
+
     except Exception as e:
         # Print any exceptions that occur during the process
         print(e)
