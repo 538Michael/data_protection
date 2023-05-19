@@ -73,6 +73,9 @@ def save_new_anonymization(table_id: int) -> None:
                     values = {}
                     # Generate anonymized values for each column in the table
                     for column in table.columns:
+                        faker.seed_instance(
+                            f"database{table.database_id}table{table_id}column{column.name}row{row[0]}value{row[column.name]}"
+                        )
                         values[column.name] = anonymization_mapping.get(
                             column.anonymization_type
                         )()
