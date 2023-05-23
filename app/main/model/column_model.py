@@ -1,6 +1,17 @@
 from app.main import db
 
-ANONYMIZATION_TYPE = ["name", "date_time", "date", "time", "cpf", "rg", "ipv4", "ipv6"]
+ANONYMIZATION_TYPE = [
+    "name",
+    "address",
+    "email",
+    "date_time",
+    "date",
+    "time",
+    "cpf",
+    "rg",
+    "ipv4",
+    "ipv6",
+]
 
 
 class Column(db.Model):
