@@ -11,6 +11,8 @@ ANONYMIZATION_TYPE = [
     "rg",
     "ipv4",
     "ipv6",
+    "phone_number",
+    "cellphone_number",
 ]
 
 

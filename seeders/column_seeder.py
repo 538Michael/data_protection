@@ -23,4 +23,14 @@ def add_columns(db):
     new_column = Column(table_id=1, name="ip", anonymization_type="ipv4")
     db.session.add(new_column)
 
+    new_column = Column(
+        table_id=1, name="phone_number", anonymization_type="phone_number"
+    )
+    db.session.add(new_column)
+
+    new_column = Column(
+        table_id=1, name="cellphone_number", anonymization_type="cellphone_number"
+    )
+    db.session.add(new_column)
+
     db.session.flush()

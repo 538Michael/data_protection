@@ -35,6 +35,8 @@ anonymization_mapping = {
     "rg": lambda: fix_rg(faker.rg()),
     "ipv4": faker.ipv4,
     "ipv6": faker.ipv6,
+    "phone_number": faker.phone_number,
+    "cellphone_number": faker.cellphone_number,
 }
 
 
