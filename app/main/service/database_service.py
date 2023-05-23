@@ -1,6 +1,6 @@
 from math import ceil
 
-from sqlalchemy import MetaData, Table, and_, create_engine
+from sqlalchemy import MetaData, Table, and_, create_engine, inspect
 from sqlalchemy_utils import create_database, database_exists
 from werkzeug.datastructures import ImmutableMultiDict
 
@@ -147,6 +147,12 @@ def _validate_database_unique_constraint(
 def clone_database(database: Database, src_table: str, dest_columns: list = None):
     # Create an engine and metadata for the source database
     src_engine = create_engine(url=database.url)
+    if not database_exists(url=src_engine.url):
+        raise DefaultException("database_not_exists", code=409)
+
+    if not inspect(src_engine).has_table(src_table):
+        raise DefaultException("table_not_exists", code=409)
+
     src_metadata = MetaData()
 
     # Reflect the structure of the source table
@@ -159,6 +165,10 @@ def clone_database(database: Database, src_table: str, dest_columns: list = None
 
     # Create an engine and metadata for the destination database
     dest_engine = create_engine(url=database.cloud_url)
+    # Drop and recreate the destination table
+    if not database_exists(url=dest_engine.url):
+        create_database(url=dest_engine.url)
+
     dest_metadata = MetaData()
 
     # Create a table object representing the destination table
@@ -169,17 +179,14 @@ def clone_database(database: Database, src_table: str, dest_columns: list = None
         include_columns=dest_columns,
     )
 
-    # Drop and recreate the destination table
-    if not database_exists(url=dest_engine.url):
-        create_database(url=dest_engine.url)
-    dest_metadata.drop_all(bind=dest_engine, checkfirst=True)
-    dest_metadata.create_all(bind=dest_engine, checkfirst=True)
+    dest_table.drop(bind=dest_engine, checkfirst=True)
+    dest_table.create(bind=dest_engine, checkfirst=True)
 
     try:
         # Begin transactions with both source and destination databases
-        with src_engine.begin() as srcConnection, dest_engine.begin() as destConnection:
+        with src_engine.begin() as src_connection, dest_engine.begin() as dest_connection:
             # Select all rows from the source table
-            results = srcConnection.execute(src_table.select())
+            results = src_connection.execute(src_table.select())
 
             # Fetch the rows in batches of a specified size
             batch_size = 100000
@@ -188,7 +195,7 @@ def clone_database(database: Database, src_table: str, dest_columns: list = None
             while rows:
                 rows_values = [tuple(row) for row in rows]
                 # Insert the rows into the destination table
-                destConnection.execute(dest_table.insert().values(rows_values))
+                dest_connection.execute(dest_table.insert().values(rows_values))
 
                 # Fetch the next batch of rows
                 rows = results.fetchmany(batch_size)
@@ -198,9 +205,9 @@ def clone_database(database: Database, src_table: str, dest_columns: list = None
         print(e)
     finally:
         # Close the connections and dispose of the engines
-        srcConnection.close()
+        src_connection.close()
         src_engine.dispose()
-        destConnection.close()
+        dest_connection.close()
         dest_engine.dispose()
 
 
