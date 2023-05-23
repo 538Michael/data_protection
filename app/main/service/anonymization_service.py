@@ -27,7 +27,7 @@ def fix_rg(rg: str):
 anonymization_mapping = {
     "name": faker.name,
     "address": faker.address,
-    "email": faker.email,
+    "email": faker.ascii_email,
     "date_time": faker.date_time,
     "date": faker.date,
     "time": faker.time,
