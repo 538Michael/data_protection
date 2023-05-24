@@ -16,9 +16,7 @@ class Table(db.Model):
     )
 
     id = db.Column(db.Integer, nullable=False, autoincrement=True, primary_key=True)
-    database_id = db.Column(
-        db.Integer, db.ForeignKey("database.id"), nullable=False, unique=True
-    )
+    database_id = db.Column(db.Integer, db.ForeignKey("database.id"), nullable=False)
 
     name = db.Column(db.String(255), nullable=False)
 

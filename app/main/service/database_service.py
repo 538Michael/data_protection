@@ -1,6 +1,8 @@
+import time
 from math import ceil
 
 from sqlalchemy import MetaData, Table, and_, create_engine, inspect
+from sqlalchemy.orm import Session
 from sqlalchemy_utils import create_database, database_exists
 from werkzeug.datastructures import ImmutableMultiDict
 
@@ -163,6 +165,9 @@ def clone_database(database: Database, src_table: str, dest_columns: list = None
         autoload_with=src_engine,
     )
 
+    # Create a session for the source database
+    src_session = Session(bind=src_engine)
+
     # Create an engine and metadata for the destination database
     dest_engine = create_engine(url=database.cloud_url)
     # Drop and recreate the destination table
@@ -182,32 +187,35 @@ def clone_database(database: Database, src_table: str, dest_columns: list = None
     dest_table.drop(bind=dest_engine, checkfirst=True)
     dest_table.create(bind=dest_engine, checkfirst=True)
 
+    # Create a session for the destination database
+    dest_session = Session(bind=dest_engine)
+
     try:
-        # Begin transactions with both source and destination databases
-        with src_engine.begin() as src_connection, dest_engine.begin() as dest_connection:
-            # Select all rows from the source table
-            results = src_connection.execute(src_table.select())
+        # Select all rows from the source table
+        results = src_session.execute(src_table.select())
 
-            # Fetch the rows in batches of a specified size
-            batch_size = 100000
+        # Fetch the rows in batches of a specified size
+        batch_size = 100000
+        rows = results.fetchmany(batch_size)
+
+        while rows:
+            rows_values = [tuple(row) for row in rows]
+            # Insert the rows into the destination table
+            dest_session.execute(dest_table.insert().values(rows_values))
+            dest_session.commit()
+
+            # Fetch the next batch of rows
             rows = results.fetchmany(batch_size)
-
-            while rows:
-                rows_values = [tuple(row) for row in rows]
-                # Insert the rows into the destination table
-                dest_connection.execute(dest_table.insert().values(rows_values))
-
-                # Fetch the next batch of rows
-                rows = results.fetchmany(batch_size)
 
     except Exception as e:
         # Print any exceptions that occur during the process
         print(e)
     finally:
-        # Close the connections and dispose of the engines
-        src_connection.close()
+        # Close the session
+        src_session.close()
+        dest_session.close()
+        # Dispose of the engines
         src_engine.dispose()
-        dest_connection.close()
         dest_engine.dispose()
 
 
