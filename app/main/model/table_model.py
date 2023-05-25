@@ -20,6 +20,8 @@ class Table(db.Model):
 
     name = db.Column(db.String(255), nullable=False)
 
+    anonymized = db.Column(db.Boolean, nullable=False, server_default="false")
+
     database = db.relationship("Database", back_populates="tables")
     columns = db.relationship("Column", back_populates="table")
 

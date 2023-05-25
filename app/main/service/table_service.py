@@ -162,15 +162,21 @@ def clone_table(table: Table, dest_columns: list = None):
         rows = results.fetchmany(batch_size)
 
         while rows:
+            print("a")
             rows_values = [tuple(row) for row in rows]
             # Insert the rows into the destination table
             dest_session.execute(dest_table.insert().values(rows_values))
-            dest_session.commit()
 
             # Fetch the next batch of rows
             rows = results.fetchmany(batch_size)
 
+        dest_session.commit()
+
     except Exception as e:
+        dest_session.rollback()
+        dest_session.close()
+        dest_table.drop(bind=dest_engine, checkfirst=True)
+
         # Print any exceptions that occur during the process
         print(e)
     finally:

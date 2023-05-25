@@ -116,11 +116,15 @@ def save_new_anonymization(table_id: int) -> None:
                 tableObj.update().where(text(f"{primary_key} = :_{primary_key}")),
                 rows_to_update,
             )
-            session.commit()
 
             rows = results.fetchmany(batch_size)
 
+        session.commit()
+
     except Exception as e:
+        session.rollback()
+
+        # Print any exceptions that occur during the process
         print(e)
 
     finally:
@@ -209,25 +213,23 @@ def delete_anonymization(table_id: int):
                 dest_table.update().where(text(f"{primary_key} = :_{primary_key}")),
                 rows_to_update,
             )
-            dest_session.commit()
 
             rows = results.fetchmany(batch_size)
 
-    except exc.OperationalError:
-        raise DefaultException("database_not_exists", code=409)
-    except exc.NoSuchTableError:
-        raise DefaultException("table_not_exists", code=409)
+        dest_session.commit()
+
     except Exception as e:
+        dest_session.rollback()
+
+        # Print any exceptions that occur during the process
         print(e)
     finally:
-        # Close the source session
+        # Close the source and destination sessions
         src_session.close()
+        dest_session.close()
 
         # Drop the source table from the source engine
         src_table.drop(bind=src_engine, checkfirst=True)
-
-        # Close the destination session
-        dest_session.close()
 
         # Dispose the source and destination engines
         src_engine.dispose()
