@@ -38,6 +38,7 @@ class Database(Resource):
                 "enum": _CONTENT_PER_PAGE,
                 "type": int,
             },
+            "user_id": {"description": "Database user id", "type": int},
             "type": {
                 "description": "Database type",
                 "type": str,

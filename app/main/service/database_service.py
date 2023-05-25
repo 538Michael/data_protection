@@ -7,7 +7,7 @@ from werkzeug.datastructures import ImmutableMultiDict
 from app.main import db
 from app.main.config import Config
 from app.main.exceptions import DefaultException
-from app.main.model import Database
+from app.main.model import Database, User
 
 _CONTENT_PER_PAGE = Config.DEFAULT_CONTENT_PER_PAGE
 
@@ -15,6 +15,7 @@ _CONTENT_PER_PAGE = Config.DEFAULT_CONTENT_PER_PAGE
 def get_databases(params: ImmutableMultiDict):
     page = params.get("page", type=int, default=1)
     per_page = params.get("per_page", type=int, default=_CONTENT_PER_PAGE)
+    user_id = params.get("user_id", type=int)
     type = params.get("type", type=str)
     username = params.get("username", type=str)
     host = params.get("host", type=str)
@@ -23,6 +24,8 @@ def get_databases(params: ImmutableMultiDict):
 
     filters = []
 
+    if user_id:
+        filters.append(Database.user.has(User.id == user_id))
     if type:
         filters.append(Database.type == type)
     if username:
