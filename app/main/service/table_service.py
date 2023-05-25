@@ -3,19 +3,19 @@ from math import ceil
 from sqlalchemy import MetaData
 from sqlalchemy import Table as saTable
 from sqlalchemy import and_, create_engine, inspect
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy_utils import create_database, database_exists
 from werkzeug.datastructures import ImmutableMultiDict
 
 from app.main import db
 from app.main.config import Config
 from app.main.exceptions import DefaultException
-from app.main.model import Table
+from app.main.model import Database, Table, User
 
 _CONTENT_PER_PAGE = Config.DEFAULT_CONTENT_PER_PAGE
 
 
-def get_tables(params: ImmutableMultiDict):
+def get_tables(current_user: User, params: ImmutableMultiDict):
     page = params.get("page", type=int, default=1)
     per_page = params.get("per_page", type=int, default=_CONTENT_PER_PAGE)
     database_id = params.get("database_id", type=int)
@@ -23,6 +23,8 @@ def get_tables(params: ImmutableMultiDict):
 
     filters = []
 
+    if not current_user.is_admin:
+        filters.append(Table.database.has(Database.user_id == current_user.id))
     if database_id:
         filters.append(Table.database_id == database_id)
     if name:
@@ -42,14 +44,20 @@ def get_tables(params: ImmutableMultiDict):
     }
 
 
-def get_table_by_id(table_id: int) -> None:
-    return get_table(table_id=table_id)
+def get_table_by_id(current_user: User, table_id: int) -> None:
+    table = get_table(table_id=table_id, options=[joinedload(Table.database)])
+
+    verify_user(current_user=current_user, user_id=table.database.user_id)
+
+    return table
 
 
-def save_new_table(database_id: int, data: dict[str, str]) -> None:
+def save_new_table(current_user: User, database_id: int, data: dict[str, str]) -> None:
     name = data.get("name")
 
     database = get_database(database_id=database_id)
+
+    verify_user(current_user=current_user, user_id=database.user_id)
 
     _validate_table_unique_constraint(database_id=database_id, name=name)
 
@@ -59,13 +67,15 @@ def save_new_table(database_id: int, data: dict[str, str]) -> None:
     db.session.commit()
 
 
-def update_table(table_id: int, data: dict[str, any]) -> None:
+def update_table(current_user: User, table_id: int, data: dict[str, any]) -> None:
     new_name = data.get("name")
 
-    table = get_table(table_id=table_id)
+    table = get_table(table_id=table_id, options=[joinedload(Table.database)])
+
+    verify_user(current_user=current_user, user_id=table.database.user_id)
 
     _validate_table_unique_constraint(
-        database=table.database_id,
+        database_id=table.database_id,
         name=new_name,
         filters=[Table.id != table_id],
     )
@@ -75,8 +85,10 @@ def update_table(table_id: int, data: dict[str, any]) -> None:
     db.session.commit()
 
 
-def delete_table(table_id: int) -> None:
-    table = get_table(table_id=table_id)
+def delete_table(current_user: User, table_id: int) -> None:
+    table = get_table(table_id=table_id, options=[joinedload(Table.database)])
+
+    verify_user(current_user=current_user, user_id=table.database.user_id)
 
     db.session.delete(table)
     db.session.commit()
@@ -188,3 +200,4 @@ def clone_table(table: Table, dest_columns: list = None):
 
 
 from app.main.service.database_service import get_database
+from app.main.service.user.user_service import verify_user

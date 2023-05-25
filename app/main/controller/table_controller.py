@@ -6,6 +6,7 @@ from app.main.service import (
     delete_table,
     get_table_by_id,
     get_tables,
+    jwt_required,
     save_new_table,
     update_table,
 )
@@ -41,54 +42,64 @@ class Table(Resource):
             "name": {"description": "Table name", "type": str},
         },
         description=f"List of registered tables with pagination. {_DEFAULT_CONTENT_PER_PAGE} tables per page.",
+        security="apikey",
     )
     @api.marshal_with(_table_list, code=200, description="table_list")
-    def get(self):
+    @jwt_required()
+    def get(self, current_user):
         """List all tables"""
         params = request.args
-        return get_tables(params=params)
+        return get_tables(current_user=current_user, params=params)
 
 
 @api.route("/<int:table_id>")
 class TableById(Resource):
-    @api.doc("Update a table")
+    @api.doc("Update a table", security="apikey")
     @api.expect(_table_update, validate=True)
     @api.response(200, "table_updated", _default_message_response)
     @api.response(400, "Input payload validation failed", _validation_error_response)
+    @api.response(401, "user_unauthorized", _default_message_response)
     @api.response(404, "table_not_found", _default_message_response)
     @api.response(409, "table_already_exist", _default_message_response)
-    def put(self, table_id):
+    @jwt_required()
+    def put(self, current_user, table_id: int):
         """Update a table"""
         data = request.json
-        update_table(table_id=table_id, data=data)
+        update_table(current_user=current_user, table_id=table_id, data=data)
         return {"message": "table_updated"}, 200
 
-    @api.doc("Delete a table")
+    @api.doc("Delete a table", security="apikey")
     @api.response(200, "table_deleted", _default_message_response)
+    @api.response(401, "user_unauthorized", _default_message_response)
     @api.response(404, "table_not_found", _default_message_response)
-    def delete(self, table_id):
+    @jwt_required()
+    def delete(self, current_user, table_id: int):
         """Delete a table"""
-        delete_table(table_id=table_id)
+        delete_table(current_user=current_user, table_id=table_id)
         return {"message": "table_deleted"}, 200
 
-    @api.doc("Get table by id")
+    @api.doc("Get table by id", security="apikey")
     @api.marshal_with(_table_response, code=200, description="Table info")
+    @api.response(401, "user_unauthorized", _default_message_response)
     @api.response(404, "table_not_found", _default_message_response)
-    def get(self, table_id: int):
+    @jwt_required()
+    def get(self, current_user, table_id: int):
         """Get table by id"""
-        return get_table_by_id(table_id=table_id)
+        return get_table_by_id(current_user=current_user, table_id=table_id)
 
 
 @api.route("/<int:database_id>")
 class TableByDatabaseId(Resource):
-    @api.doc("Creates a new table")
+    @api.doc("Creates a new table", security="apikey")
     @api.expect(_table_post, validate=True)
     @api.response(201, "table_created", _default_message_response)
     @api.response(400, "Input payload validation failed", _validation_error_response)
+    @api.response(401, "user_unauthorized", _default_message_response)
     @api.response(404, "database_not_found", _default_message_response)
     @api.response(409, "table_already_exist", _default_message_response)
-    def post(self, database_id):
+    @jwt_required()
+    def post(self, current_user, database_id):
         """Creates a new table"""
         data = request.json
-        save_new_table(database_id=database_id, data=data)
+        save_new_table(current_user=current_user, database_id=database_id, data=data)
         return {"message": "table_created"}, 201
