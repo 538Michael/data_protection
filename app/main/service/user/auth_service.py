@@ -62,7 +62,7 @@ def jwt_required(admin_check: bool = False):
             if admin_check and not current_user.is_admin:
                 raise DefaultException("administrator_privileges_required", code=403)
 
-            return fn(*args, **kwargs)
+            return fn(current_user, *args, **kwargs)
 
         return decorator
 
