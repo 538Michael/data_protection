@@ -53,10 +53,9 @@ def save_new_anonymization(table_id: int) -> None:
             raise DefaultException("table_already_anonymized", code=409)
         engine.dispose()
 
-    # Clone the database by creating a destination table with the same structure and columns
-    clone_database(
-        database=table.database,
-        src_table=table.name,
+    # Clone the table by creating a destination table with the same structure and columns
+    clone_table(
+        table=table,
         dest_columns=[table.primary_key] + [column.name for column in table.columns],
     )
 
@@ -235,5 +234,4 @@ def delete_anonymization(table_id: int):
         dest_engine.dispose()
 
 
-from app.main.service.database_service import clone_database
-from app.main.service.table_service import get_table
+from app.main.service.table_service import clone_table, get_table
