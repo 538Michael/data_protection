@@ -4,7 +4,7 @@ from flask_restx import Resource
 from app.main.config import Config
 from app.main.service import (
     delete_column,
-    get_column,
+    get_column_by_id,
     get_columns,
     save_new_column,
     update_column,
@@ -76,7 +76,7 @@ class ColumnById(Resource):
     @api.response(404, "column_not_found", _default_message_response)
     def get(self, column_id: int):
         """Get column by id"""
-        return get_column(column_id=column_id)
+        return get_column_by_id(column_id=column_id)
 
 
 @api.route("/<int:table_id>")

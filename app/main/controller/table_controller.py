@@ -4,7 +4,7 @@ from flask_restx import Resource
 from app.main.config import Config
 from app.main.service import (
     delete_table,
-    get_table,
+    get_table_by_id,
     get_tables,
     save_new_table,
     update_table,
@@ -76,7 +76,7 @@ class TableById(Resource):
     @api.response(404, "table_not_found", _default_message_response)
     def get(self, table_id: int):
         """Get table by id"""
-        return get_table(table_id=table_id)
+        return get_table_by_id(table_id=table_id)
 
 
 @api.route("/<int:database_id>")

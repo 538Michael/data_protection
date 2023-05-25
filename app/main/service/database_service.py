@@ -12,7 +12,7 @@ from app.main.model import Database, User
 _CONTENT_PER_PAGE = Config.DEFAULT_CONTENT_PER_PAGE
 
 
-def get_databases(params: ImmutableMultiDict):
+def get_databases(current_user: User, params: ImmutableMultiDict):
     page = params.get("page", type=int, default=1)
     per_page = params.get("per_page", type=int, default=_CONTENT_PER_PAGE)
     user_id = params.get("user_id", type=int)
@@ -24,7 +24,9 @@ def get_databases(params: ImmutableMultiDict):
 
     filters = []
 
-    if user_id:
+    if not current_user.is_admin:
+        filters.append(Database.user_id == current_user.id)
+    elif user_id:
         filters.append(Database.user_id == user_id)
     if type:
         filters.append(Database.type == type)
@@ -51,18 +53,25 @@ def get_databases(params: ImmutableMultiDict):
     }
 
 
-def get_database_by_id(database_id: int) -> None:
-    return get_database(database_id=database_id)
+def get_database_by_id(current_user: User, database_id: int) -> None:
+    database = get_database(database_id=database_id)
+
+    verify_user(current_user=current_user, user_id=database.user_id)
+
+    return database
 
 
-def save_new_database(data: dict[str, str]) -> None:
+def save_new_database(current_user: User, data: dict[str, str]) -> None:
     type = data.get("type")
     username = data.get("username")
     host = data.get("host")
     port = data.get("port")
     name = data.get("name")
 
-    user = get_user(user_id=data.get("user_id"))
+    if not current_user.is_admin:
+        user = current_user
+    else:
+        user = get_user(user_id=data.get("user_id"))
 
     _validate_database_unique_constraint(
         type=type, username=username, host=host, port=port, name=name
@@ -82,7 +91,7 @@ def save_new_database(data: dict[str, str]) -> None:
     db.session.commit()
 
 
-def update_database(database_id: int, data: dict[str, any]) -> None:
+def update_database(current_user: User, database_id: int, data: dict[str, any]) -> None:
     new_type = data.get("type")
     new_username = data.get("username")
     new_host = data.get("host")
@@ -90,6 +99,8 @@ def update_database(database_id: int, data: dict[str, any]) -> None:
     new_name = data.get("name")
 
     database = get_database(database_id=database_id)
+
+    verify_user(current_user=current_user, user_id=database.user_id)
 
     _validate_database_unique_constraint(
         type=new_type,
@@ -110,8 +121,10 @@ def update_database(database_id: int, data: dict[str, any]) -> None:
     db.session.commit()
 
 
-def delete_database(database_id: int) -> None:
+def delete_database(current_user: User, database_id: int) -> None:
     database = get_database(database_id=database_id)
+
+    verify_user(current_user=current_user, user_id=database.user_id)
 
     db.session.delete(database)
     db.session.commit()
@@ -147,4 +160,4 @@ def _validate_database_unique_constraint(
         raise DefaultException("database_already_exist", code=409)
 
 
-from app.main.service.user.user_service import get_user
+from app.main.service.user.user_service import get_user, verify_user
