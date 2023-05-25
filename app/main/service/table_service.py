@@ -162,7 +162,6 @@ def clone_table(table: Table, dest_columns: list = None):
         rows = results.fetchmany(batch_size)
 
         while rows:
-            print("a")
             rows_values = [tuple(row) for row in rows]
             # Insert the rows into the destination table
             dest_session.execute(dest_table.insert().values(rows_values))

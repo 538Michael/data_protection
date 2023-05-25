@@ -18,12 +18,18 @@ class TableDTO:
         )
     }
 
+    table_anonymized = {
+        "anonymized": fields.Boolean(
+            required=True, description="table anonymization status", default=False
+        )
+    }
+
     table_post = api.model("table_post", table_name)
 
     table_update = api.clone("table_put", table_post)
 
-    table_response = api.clone(
-        "table_response", table_id | table_database_id, table_post
+    table_response = api.model(
+        "table_response", table_id | table_database_id | table_name | table_anonymized
     )
 
     table_list = api.model(

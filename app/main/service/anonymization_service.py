@@ -4,7 +4,7 @@ import time
 from sqlalchemy import MetaData, Table, create_engine, exc, inspect, text
 from sqlalchemy.orm import Session, joinedload
 
-from app.main import faker
+from app.main import db, faker
 from app.main.exceptions import DefaultException
 from app.main.model import Table as AnonTable
 
@@ -134,6 +134,9 @@ def save_new_anonymization(table_id: int) -> None:
     # Dispose the engine
     engine.dispose()
 
+    table.anonymized = True
+    db.session.commit()
+
 
 def delete_anonymization(table_id: int):
     # Get the table object with the specified ID, including the associated database information
@@ -234,6 +237,9 @@ def delete_anonymization(table_id: int):
         # Dispose the source and destination engines
         src_engine.dispose()
         dest_engine.dispose()
+
+    table.anonymized = False
+    db.session.commit()
 
 
 from app.main.service.table_service import clone_table, get_table
