@@ -64,4 +64,9 @@ def get_user(user_id: int, options: list = None) -> User:
     return user
 
 
+def verify_user(current_user: User, user_id: int):
+    if (not current_user.is_admin) and (user_id != current_user.id):
+        raise DefaultException("user_unauthorized", code=401)
+
+
 from app.main.service.user.password_service import hash_password
