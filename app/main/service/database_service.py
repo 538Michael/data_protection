@@ -25,7 +25,7 @@ def get_databases(params: ImmutableMultiDict):
     filters = []
 
     if user_id:
-        filters.append(Database.user.has(User.id == user_id))
+        filters.append(Database.user_id == user_id)
     if type:
         filters.append(Database.type == type)
     if username:
