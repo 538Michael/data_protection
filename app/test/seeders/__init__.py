@@ -1,1 +1,1 @@
-from .user_seeder import *
+from .user import *
