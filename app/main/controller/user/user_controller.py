@@ -2,6 +2,7 @@ from flask import request
 from flask_restx import Resource
 
 from app.main.config import Config
+from app.main.model import User
 from app.main.service import get_user_by_id, get_users, jwt_required, save_new_user
 from app.main.util import DefaultResponsesDTO, UserDTO
 
@@ -37,7 +38,7 @@ class User(Resource):
     )
     @api.marshal_with(_user_list, code=200, description="users_list ")
     @jwt_required(admin_check=True)
-    def get(self):
+    def get(self, current_user):
         """List all registered users"""
         params = request.args
         return get_users(params=params)
@@ -62,6 +63,6 @@ class UserWithId(Resource):
     @api.response(404, "user_not_found", _default_message_response)
     @api.marshal_with(_user_response, code=200, description="User Info")
     @jwt_required()
-    def get(self, user_id: int):
+    def get(self, current_user, user_id: int):
         """Get user by id"""
         return get_user_by_id(user_id)

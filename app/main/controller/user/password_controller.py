@@ -24,7 +24,7 @@ class ChangePassword(Resource):
         _default_message_response,
     )
     @jwt_required()
-    def patch(self, user_id: int) -> tuple[dict[str, str], int]:
+    def patch(self, current_user, user_id: int) -> tuple[dict[str, str], int]:
         """Change password when logged in"""
         data = request.json
         change_password(data=data, user_id=user_id)
