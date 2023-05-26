@@ -10,7 +10,6 @@ class Config:
     SECRET_KEY = os.getenv("SECRET_KEY", "my_precious_secret_key")
     DEBUG = False
     JWT_EXP = 8
-    ACTIVATION_EXP_SECONDS = 86400
 
     # Remove additional message on 404 responses
     RESTX_ERROR_404_HELP = False
@@ -22,8 +21,10 @@ class Config:
     CONTENT_PER_PAGE = [5, 10, 20, 30, 50, 100]
     DEFAULT_CONTENT_PER_PAGE = CONTENT_PER_PAGE[1]
 
-    # The maximum file size for upload
-    MAX_CONTENT_LENGTH = 5 * 1024 * 1024  # 5 megas
+    CLOUD_URL = {
+        "mysql": "mysql://root:mysql@localhost:3306",
+        "postgresql": "postgresql://postgres:postgres@localhost:5432",
+    }
 
 
 class DevelopmentConfig(Config):

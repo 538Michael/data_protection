@@ -24,4 +24,15 @@ def add_databases(db):
     )
     db.session.add(new_database)
 
+    new_database = Database(
+        user_id=1,
+        type="mysql",
+        username="michaelsouza1",
+        password="larces132*",
+        host="client-database.mysql.uhserver.com",
+        port=3306,
+        name="client_database",
+    )
+    db.session.add(new_database)
+
     db.session.flush()

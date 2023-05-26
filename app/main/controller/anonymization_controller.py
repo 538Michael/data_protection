@@ -18,7 +18,7 @@ class AnonymizationByTableId(Resource):
     @api.response(404, "table_not_found", _default_message_response)
     @api.response(
         409,
-        "database_not_exists\ntable_not_exists\ntable_already_anonymized",
+        "database_not_exists\ntable_not_exists\ncolumn_not_exists\ntable_already_anonymized",
         _default_message_response,
     )
     def post(self, table_id):

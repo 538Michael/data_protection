@@ -1,4 +1,5 @@
 from app.main import db
+from app.main.config import Config
 
 DATABASE_TYPE = ["mysql", "postgresql"]
 
@@ -43,12 +44,8 @@ class Database(db.Model):
 
     @property
     def cloud_url(self) -> str:
-        cloud_db_url = "{}://{}:{}@{}:{}/{}".format(
-            self.type,
-            "postgres",
-            "postgres",
-            "localhost",
-            "5432",
+        cloud_db_url = "{}/{}".format(
+            Config.CLOUD_URL[self.type],
             f"database{self.id}",
         )
         return cloud_db_url

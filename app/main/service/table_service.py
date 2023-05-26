@@ -140,12 +140,15 @@ def clone_table(table: Table, dest_columns: list = None):
         autoload_with=src_engine,
     )
 
+    for column in table.columns:
+        if not column.name in src_table.columns:
+            raise DefaultException("column_not_exists", code=409)
+
     # Create a session for the source database
     src_session = Session(bind=src_engine)
 
     # Create an engine and metadata for the destination database
     dest_engine = create_engine(url=table.database.cloud_url)
-    # Drop and recreate the destination table
     if not database_exists(url=dest_engine.url):
         create_database(url=dest_engine.url)
 

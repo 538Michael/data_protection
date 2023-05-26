@@ -71,4 +71,34 @@ def add_columns(db):
     )
     db.session.add(new_column)
 
+    new_column = Column(table_id=3, name="name", anonymization_type="name")
+    db.session.add(new_column)
+
+    new_column = Column(table_id=3, name="data", anonymization_type="date")
+    db.session.add(new_column)
+
+    new_column = Column(table_id=3, name="cpf", anonymization_type="cpf")
+    db.session.add(new_column)
+
+    new_column = Column(table_id=3, name="rg", anonymization_type="rg")
+    db.session.add(new_column)
+
+    new_column = Column(table_id=3, name="ip", anonymization_type="ipv4")
+    db.session.add(new_column)
+
+    new_column = Column(table_id=4, name="name", anonymization_type="name")
+    db.session.add(new_column)
+
+    new_column = Column(table_id=4, name="data", anonymization_type="date")
+    db.session.add(new_column)
+
+    new_column = Column(table_id=4, name="cpf", anonymization_type="cpf")
+    db.session.add(new_column)
+
+    new_column = Column(table_id=4, name="rg", anonymization_type="rg")
+    db.session.add(new_column)
+
+    new_column = Column(table_id=4, name="ip", anonymization_type="ipv4")
+    db.session.add(new_column)
+
     db.session.flush()
