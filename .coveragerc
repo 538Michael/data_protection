@@ -1,0 +1,23 @@
+[run]
+source = .
+omit =
+    */__pycache__/*
+    app/main/controller/**/__init__.py
+    app/main/model/**/*__init__.py
+    app/main/service/**/*__init__.py
+    app/main/util/**/*__init__.py
+    app/main/exceptions/**/__init__.py
+    app/test/*
+    venv/*
+    migrations/*
+    seeders/*
+    seeder.py
+    application.py
+
+[report]
+skip_empty = True
+skip_covered = True
+exclude_lines =
+    # pragma: no cover
+    def __repr__
+    if options is not None
