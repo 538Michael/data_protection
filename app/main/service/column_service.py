@@ -1,17 +1,18 @@
 from math import ceil
 
 from sqlalchemy import and_
+from sqlalchemy.orm import joinedload
 from werkzeug.datastructures import ImmutableMultiDict
 
 from app.main import db
 from app.main.config import Config
 from app.main.exceptions import DefaultException
-from app.main.model import Column
+from app.main.model import Column, Database, Table, User
 
 _CONTENT_PER_PAGE = Config.DEFAULT_CONTENT_PER_PAGE
 
 
-def get_columns(params: ImmutableMultiDict):
+def get_columns(current_user: User, params: ImmutableMultiDict):
     page = params.get("page", type=int, default=1)
     per_page = params.get("per_page", type=int, default=_CONTENT_PER_PAGE)
     table_id = params.get("table_id", type=int)
@@ -19,6 +20,10 @@ def get_columns(params: ImmutableMultiDict):
 
     filters = []
 
+    if not current_user.is_admin:
+        filters.append(
+            Column.table.has(Table.database.has(Database.user_id == current_user.id))
+        )
     if table_id:
         filters.append(Column.table_id == table_id)
     if name:
@@ -38,14 +43,23 @@ def get_columns(params: ImmutableMultiDict):
     }
 
 
-def get_column_by_id(column_id: int) -> None:
+def get_column_by_id(current_user: User, column_id: int) -> None:
+    column = get_column(
+        column_id=column_id,
+        options=[joinedload(Column.table).joinedload(Table.database)],
+    )
+
+    verify_user(current_user=current_user, user_id=column.table.database.user_id)
+
     return get_column(column_id=column_id)
 
 
-def save_new_column(table_id: int, data: dict[str, str]) -> None:
+def save_new_column(current_user: User, table_id: int, data: dict[str, str]) -> None:
     name = data.get("name")
 
-    table = get_table(table_id=table_id)
+    table = get_table(table_id=table_id, options=[joinedload(Table.database)])
+
+    verify_user(current_user=current_user, user_id=table.database.user_id)
 
     _validate_column_unique_constraint(table_id=table_id, name=name)
 
@@ -58,10 +72,15 @@ def save_new_column(table_id: int, data: dict[str, str]) -> None:
     db.session.commit()
 
 
-def update_column(column_id: int, data: dict[str, any]) -> None:
+def update_column(current_user: User, column_id: int, data: dict[str, any]) -> None:
     new_name = data.get("name")
 
-    column = get_column(column_id=column_id)
+    column = get_column(
+        column_id=column_id,
+        options=[joinedload(Column.table).joinedload(Table.database)],
+    )
+
+    verify_user(current_user=current_user, user_id=column.table.database.user_id)
 
     _validate_column_unique_constraint(
         database=column.table_id,
@@ -74,8 +93,13 @@ def update_column(column_id: int, data: dict[str, any]) -> None:
     db.session.commit()
 
 
-def delete_column(column_id: int) -> None:
-    column = get_column(column_id=column_id)
+def delete_column(current_user: User, column_id: int) -> None:
+    column = get_column(
+        column_id=column_id,
+        options=[joinedload(Column.table).joinedload(Table.database)],
+    )
+
+    verify_user(current_user=current_user, user_id=column.table.database.user_id)
 
     db.session.delete(column)
     db.session.commit()
@@ -109,3 +133,4 @@ def _validate_column_unique_constraint(
 
 
 from app.main.service.table_service import get_table
+from app.main.service.user.user_service import verify_user
