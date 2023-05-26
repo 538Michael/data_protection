@@ -83,7 +83,7 @@ def update_column(current_user: User, column_id: int, data: dict[str, any]) -> N
     verify_user(current_user=current_user, user_id=column.table.database.user_id)
 
     _validate_column_unique_constraint(
-        database=column.table_id,
+        table_id=column.table_id,
         name=new_name,
         filters=[Column.id != column_id],
     )
