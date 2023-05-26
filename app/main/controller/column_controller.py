@@ -2,6 +2,7 @@ from flask import request
 from flask_restx import Resource
 
 from app.main.config import Config
+from app.main.model import ANONYMIZATION_TYPE
 from app.main.service import (
     delete_column,
     get_column_by_id,
@@ -40,6 +41,11 @@ class Column(Resource):
             },
             "table_id": {"description": "Table id", "type": int},
             "name": {"description": "Column name", "type": str},
+            "anonymization_type": {
+                "description": "Column anonymization type",
+                "type": str,
+                "enum": ANONYMIZATION_TYPE,
+            },
         },
         description=f"List of registered columns with pagination. {_DEFAULT_CONTENT_PER_PAGE} columns per page.",
         security="apikey",

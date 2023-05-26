@@ -1,5 +1,7 @@
 from flask_restx import Namespace, fields
 
+from app.main.model import ANONYMIZATION_TYPE
+
 
 class ColumnDTO:
     api = Namespace("column", description="column related operations")
@@ -17,8 +19,15 @@ class ColumnDTO:
             required=True, description="column name", min_length=1, max_length=255
         )
     }
+    column_anonymization_type = {
+        "anonymization_type": fields.String(
+            required=True,
+            description="column anonymization_type",
+            enum=ANONYMIZATION_TYPE,
+        )
+    }
 
-    column_post = api.model("column_post", column_name)
+    column_post = api.model("column_post", column_name | column_anonymization_type)
 
     column_update = api.clone("column_put", column_post)
 

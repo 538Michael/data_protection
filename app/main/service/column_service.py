@@ -17,6 +17,7 @@ def get_columns(current_user: User, params: ImmutableMultiDict):
     per_page = params.get("per_page", type=int, default=_CONTENT_PER_PAGE)
     table_id = params.get("table_id", type=int)
     name = params.get("name", type=str)
+    anonymization_type = params.get("anonymization_type", type=str)
 
     filters = []
 
@@ -28,6 +29,8 @@ def get_columns(current_user: User, params: ImmutableMultiDict):
         filters.append(Column.table_id == table_id)
     if name:
         filters.append(Column.name.ilike(f"%{name}%"))
+    if anonymization_type:
+        filters.append(Column.anonymization_type == anonymization_type)
 
     pagination = (
         Column.query.filter(*filters)
@@ -64,8 +67,7 @@ def save_new_column(current_user: User, table_id: int, data: dict[str, str]) -> 
     _validate_column_unique_constraint(table_id=table_id, name=name)
 
     new_column = Column(
-        table=table,
-        name=name,
+        table=table, name=name, anonymization_type=data.get("anonymization_type")
     )
 
     db.session.add(new_column)
@@ -89,6 +91,7 @@ def update_column(current_user: User, column_id: int, data: dict[str, any]) -> N
     )
 
     column.name = new_name
+    column.anonymization_type = data.get("anonymization_type")
 
     db.session.commit()
 
