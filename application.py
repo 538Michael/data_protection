@@ -1,5 +1,8 @@
 import logging
 import os
+import sys
+
+sys.stdout.flush()
 from logging.handlers import RotatingFileHandler
 
 from werkzeug.exceptions import HTTPException
