@@ -1,7 +1,9 @@
+import os
 import re
 import time
 
 from sqlalchemy import MetaData, Table, create_engine, exc, inspect, text
+from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy_utils import database_exists
 
@@ -45,14 +47,15 @@ def save_new_anonymization(table_id: int) -> None:
     # Get the table object with the specified ID, including the associated database information
     table = get_table(table_id=table_id, options=[joinedload(AnonTable.database)])
 
-    # Check if the cloud database exists
-    if database_exists(url=table.database.cloud_url):
+    try:
         # Create an engine based on the cloud URL of the table's database
         engine = create_engine(url=table.database.cloud_url)
         # Check if the database has the table, and if so, raise an exception
         if inspect(engine).has_table(table.name):
             raise DefaultException("table_already_anonymized", code=409)
         engine.dispose()
+    except OperationalError:
+        pass
 
     # Get the primary key of the table
     primary_key = table.primary_key
@@ -62,6 +65,8 @@ def save_new_anonymization(table_id: int) -> None:
         table=table,
         dest_columns=[primary_key] + [column.name for column in table.columns],
     )
+
+    return
 
     # Create a new engine based on the URL of the table's database
     engine = create_engine(url=table.database.url)

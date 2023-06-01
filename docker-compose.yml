@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3.3'
 
 services:
   data_protection_web:
@@ -9,6 +9,8 @@ services:
       - data_protection_db
     environment:
       TZ: 'America/Sao_Paulo'
+    volumes:
+      - ./data:/flask-app/data
     depends_on:
       data_protection_db:
         condition: service_healthy

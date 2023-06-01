@@ -71,10 +71,22 @@ def add_columns(db):
     )
     db.session.add(new_column)
 
-    new_column = Column(table_id=3, name="name", anonymization_type="name")
+    new_column = Column(table_id=3, name="nome", anonymization_type="name")
+    db.session.add(new_column)
+
+    new_column = Column(table_id=3, name="endereco", anonymization_type="address")
+    db.session.add(new_column)
+
+    new_column = Column(table_id=3, name="email", anonymization_type="email")
+    db.session.add(new_column)
+
+    new_column = Column(table_id=3, name="data_hora", anonymization_type="date_time")
     db.session.add(new_column)
 
     new_column = Column(table_id=3, name="data", anonymization_type="date")
+    db.session.add(new_column)
+
+    new_column = Column(table_id=3, name="time", anonymization_type="time")
     db.session.add(new_column)
 
     new_column = Column(table_id=3, name="cpf", anonymization_type="cpf")
@@ -83,13 +95,36 @@ def add_columns(db):
     new_column = Column(table_id=3, name="rg", anonymization_type="rg")
     db.session.add(new_column)
 
-    new_column = Column(table_id=3, name="ip", anonymization_type="ipv4")
+    new_column = Column(table_id=3, name="ipv4", anonymization_type="ipv4")
     db.session.add(new_column)
 
-    new_column = Column(table_id=4, name="name", anonymization_type="name")
+    new_column = Column(table_id=3, name="ipv6", anonymization_type="ipv6")
+    db.session.add(new_column)
+
+    new_column = Column(table_id=3, name="telefone", anonymization_type="phone_number")
+    db.session.add(new_column)
+
+    new_column = Column(
+        table_id=3, name="celular", anonymization_type="cellphone_number"
+    )
+    db.session.add(new_column)
+
+    new_column = Column(table_id=4, name="nome", anonymization_type="name")
+    db.session.add(new_column)
+
+    new_column = Column(table_id=4, name="endereco", anonymization_type="address")
+    db.session.add(new_column)
+
+    new_column = Column(table_id=4, name="email", anonymization_type="email")
+    db.session.add(new_column)
+
+    new_column = Column(table_id=4, name="data_hora", anonymization_type="date_time")
     db.session.add(new_column)
 
     new_column = Column(table_id=4, name="data", anonymization_type="date")
+    db.session.add(new_column)
+
+    new_column = Column(table_id=4, name="time", anonymization_type="time")
     db.session.add(new_column)
 
     new_column = Column(table_id=4, name="cpf", anonymization_type="cpf")
@@ -98,7 +133,18 @@ def add_columns(db):
     new_column = Column(table_id=4, name="rg", anonymization_type="rg")
     db.session.add(new_column)
 
-    new_column = Column(table_id=4, name="ip", anonymization_type="ipv4")
+    new_column = Column(table_id=4, name="ipv4", anonymization_type="ipv4")
+    db.session.add(new_column)
+
+    new_column = Column(table_id=4, name="ipv6", anonymization_type="ipv6")
+    db.session.add(new_column)
+
+    new_column = Column(table_id=4, name="telefone", anonymization_type="phone_number")
+    db.session.add(new_column)
+
+    new_column = Column(
+        table_id=4, name="celular", anonymization_type="cellphone_number"
+    )
     db.session.add(new_column)
 
     db.session.flush()

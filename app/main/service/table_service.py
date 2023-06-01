@@ -1,8 +1,11 @@
+import os
+import time
 from math import ceil
 
 from sqlalchemy import MetaData
 from sqlalchemy import Table as saTable
 from sqlalchemy import and_, create_engine, inspect
+from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy_utils import create_database, database_exists
 from werkzeug.datastructures import ImmutableMultiDict
@@ -123,8 +126,9 @@ def _validate_table_unique_constraint(
 
 def clone_table(table: Table, dest_columns: list = None):
     # Create an engine and metadata for the source database
-    src_engine = create_engine(url=table.database.url)
-    if not database_exists(url=src_engine.url):
+    try:
+        src_engine = create_engine(url=table.database.url)
+    except OperationalError:
         raise DefaultException("database_not_exists", code=409)
 
     if not inspect(src_engine).has_table(table.name):
@@ -148,9 +152,11 @@ def clone_table(table: Table, dest_columns: list = None):
     src_session = Session(bind=src_engine)
 
     # Create an engine and metadata for the destination database
+    try:
+        create_database(url=table.database.cloud_url)
+    except Exception:
+        pass
     dest_engine = create_engine(url=table.database.cloud_url)
-    if not database_exists(url=dest_engine.url):
-        create_database(url=dest_engine.url)
 
     dest_metadata = MetaData()
 
@@ -169,22 +175,38 @@ def clone_table(table: Table, dest_columns: list = None):
     dest_session = Session(bind=dest_engine)
 
     try:
-        # Select all rows from the source table
-        results = src_session.execute(src_table.select())
+        if not os.path.exists("data"):
+            os.makedirs("data")
 
-        # Fetch the rows in batches of a specified size
-        batch_size = 100000
-        rows = results.fetchmany(batch_size)
+        if not os.path.exists("data/elapsed_time"):
+            os.makedirs("data/elapsed_time")
 
-        while rows:
-            rows_values = [tuple(row) for row in rows]
-            # Insert the rows into the destination table
-            dest_session.execute(dest_table.insert().values(rows_values))
+        with open(f"data/elapsed_time/elapsed_time.txt", "a") as file:
+            for i in range(10):
+                print(i)
+                # Select all rows from the source table
+                results = src_session.execute(src_table.select())
 
-            # Fetch the next batch of rows
-            rows = results.fetchmany(batch_size)
+                # Fetch the rows in batches of a specified size
+                batch_size = 100000
+                rows = results.fetchmany(batch_size)
 
-        dest_session.commit()
+                while rows:
+                    start_time = time.time()
+                    rows_values = [tuple(row) for row in rows]
+                    # Insert the rows into the destination table
+                    dest_session.execute(dest_table.insert().values(rows_values))
+
+                    # Fetch the next batch of rows
+                    rows = results.fetchmany(batch_size)
+
+                    end_time = time.time()
+                    elapsed_time = end_time - start_time
+
+                    file.write(f"{elapsed_time}\n")
+
+                dest_session.rollback()
+            file.close()
 
     except Exception as e:
         dest_session.rollback()
@@ -200,6 +222,8 @@ def clone_table(table: Table, dest_columns: list = None):
         # Dispose of the engines
         src_engine.dispose()
         dest_engine.dispose()
+
+        dest_table.drop(bind=dest_engine, checkfirst=True)
 
 
 from app.main.service.database_service import get_database

@@ -22,8 +22,8 @@ class Config:
     DEFAULT_CONTENT_PER_PAGE = CONTENT_PER_PAGE[1]
 
     CLOUD_URL = {
-        "mysql": "mysql://root:mysql@localhost:3306",
-        "postgresql": "postgresql://postgres:postgres@localhost:5432",
+        "mysql": "mysql://root:mysql@data_protection_db:3306",
+        "postgresql": "postgresql://postgres:postgres@data_protection_db:5432",
     }
 
 

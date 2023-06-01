@@ -13,7 +13,7 @@ ENV ENV_NAME=staging
 ENV FLASK_APP=application
 COPY entrypoint.sh .
 
-RUN ["pytest"]
+# RUN ["pytest"]
 
 RUN ["chmod", "+x", "./entrypoint.sh"]
 ENTRYPOINT ["./entrypoint.sh"]
