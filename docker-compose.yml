@@ -6,14 +6,18 @@ services:
     ports:
       - 5000:5000
     links:
-      - data_protection_db
+      - data_protection_postgres
+      - data_protection_mysql
     environment:
       TZ: 'America/Sao_Paulo'
       PYTHONUNBUFFERED: 1
     volumes:
       - ./data:/flask-app/data
+    depends_on:
+      data_protection_postgres:
+        condition: service_healthy
 
-  data_protection_db:
+  data_protection_postgres:
     image: postgres:14.6
     environment:
       POSTGRES_PASSWORD: postgres
@@ -24,7 +28,34 @@ services:
     ports:
       - '5433:5432'
     volumes:
-      - data_protection_database:/var/lib/postgresql/data/
+      - data_protection_database_postgres:/var/lib/postgresql/data/
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  data_protection_mysql:
+    image: mysql:8.0.33
+    environment:
+      MYSQL_ROOT_PASSWORD: mysql
+      TZ: 'America/Sao_Paulo'
+      PGTZ: 'America/Sao_Paulo'
+    ports:
+      - '3307:3306'
+    volumes:
+      - data_protection_database_mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin", "ping", "-h", "data_protection_mysql", "-u", "root", "mysql"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
 volumes:
-  data_protection_database:
+  data_protection_database_postgres:
+  data_protection_database_mysql:
+
+
+networks:
+  default:
+    name: data_protection_network

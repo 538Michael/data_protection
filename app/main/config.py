@@ -22,8 +22,8 @@ class Config:
     DEFAULT_CONTENT_PER_PAGE = CONTENT_PER_PAGE[1]
 
     CLOUD_URL = {
-        "mysql": "mysql://root:mysql@data_protection_db:3306",
-        "postgresql": "postgresql://postgres:postgres@data_protection_db:5432",
+        "mysql": "mysql://root:mysql@data_protection_mysql:3306",
+        "postgresql": "postgresql://postgres:postgres@data_protection_postgres:5432",
     }
 
 
@@ -45,9 +45,7 @@ class DevelopmentConfig(Config):
 
 class StagingConfig(Config):
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = (
-        "postgresql+psycopg2://postgres:postgres@data_protection_db/data_protection"
-    )
+    SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://postgres:postgres@data_protection_postgres/data_protection"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     ENV = "staging"
     HOST = "0.0.0.0"
